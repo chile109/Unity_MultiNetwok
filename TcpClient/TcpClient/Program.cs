@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +18,7 @@ namespace TcpClient
             SendLoop();
             Console.ReadLine();
         }
-
+		//嘗試發訊
         private static void SendLoop()
         {
             while(true)
@@ -26,19 +26,20 @@ namespace TcpClient
                 Console.Write("Enter a request: ");
                 string req = Console.ReadLine();
                 byte[] buffer = Encoding.ASCII.GetBytes(req);
-                _clientSocket.Send(buffer);
+                _clientSocket.Send(buffer);		//發送request
 
                 byte[] receivedBuf = new byte[1024];
-                int rec = _clientSocket.Receive(receivedBuf);
+                int rec = _clientSocket.Receive(receivedBuf);	//接收responce
+
                 byte[] data = new byte[rec];
-                Array.Copy(receivedBuf, data, rec);
+                Array.Copy(receivedBuf, data, rec);		//裁減responce
                 Console.WriteLine("Received: " + Encoding.ASCII.GetString(data));
             }
         }
-
+		//嘗試連線
         private static void LoopConnect()
         {
-            int attempts = 0;
+            int attempts = 0;		//連線次數
 
             while (!_clientSocket.Connected)
 
