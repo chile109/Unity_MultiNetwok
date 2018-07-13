@@ -334,6 +334,7 @@ ASALocalRun/
 [Oo]bj/
 [Bb]uild/
 [Bb]uilds/
+[Ee]xport/
 Assets/AssetStoreTools*
 
 # Visual Studio cache directory
