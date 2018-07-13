@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,18 @@ namespace TcpNetwork
 		private static byte[] _buffer = new byte[2048];		//緩存
 		private static List<Socket> _Clients = new List<Socket>();	//client列表
 		private static Socket _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-		static void Main(string[] args)
+
+		static NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
+		static IPAddress GetIPV4()
+		{
+			foreach (IPAddressInformation ipInfo in nics[0].GetIPProperties().UnicastAddresses)
+			{
+				if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
+					return ipInfo.Address;
+			}
+			return null;
+		}
+	static void Main(string[] args)
 		{
 			Console.Title = "TCP server";
 			SetServer();
@@ -23,8 +35,8 @@ namespace TcpNetwork
 		private static void SetServer()
 		{
 			Console.WriteLine("setting server");
-			_serverSocket.Bind(new IPEndPoint(IPAddress.Any, 100));	//sochet綁定IP & Port
-			_serverSocket.Listen(1);    //允許進入的client佇列數量
+			_serverSocket.Bind(new IPEndPoint(GetIPV4(), 100));	//sochet綁定IP & Port
+			_serverSocket.Listen(10);    //允許進入的client佇列數量
 			_serverSocket.BeginAccept(new AsyncCallback(AccepCallBack), null);	
 		}
 
