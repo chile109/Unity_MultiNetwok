@@ -26,7 +26,7 @@ public class NetworkManager : MonoBehaviour
 	public void Send()
 	{
 		string req = Keyin.text;
-		byte[] buffer = Encoding.ASCII.GetBytes(req);
+		byte[] buffer = Encoding.UTF8.GetBytes(req);
 		_clientSocket.Send(buffer);     //發送request
 
 		byte[] receivedBuf = new byte[1024];
@@ -34,7 +34,7 @@ public class NetworkManager : MonoBehaviour
 
 		byte[] data = new byte[rec];
 		Array.Copy(receivedBuf, data, rec);     //裁減responce
-		Debug.Log("Received: " + Encoding.ASCII.GetString(data));
+		Debug.Log("Received: " + Encoding.UTF8.GetString(data));
 	}
 
 	//private void Update()

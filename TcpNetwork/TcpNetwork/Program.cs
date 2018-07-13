@@ -61,7 +61,7 @@ namespace TcpNetwork
 				byte[] _dataBuf = new byte[Received];
 				Array.Copy(_buffer, _dataBuf, Received);	//ReSize Buffer
 
-				string text = Encoding.ASCII.GetString(_dataBuf);
+				string text = Encoding.UTF8.GetString(_dataBuf);
 				Console.WriteLine("Received: " + text);
 
 				string responce = string.Empty;
@@ -80,7 +80,7 @@ namespace TcpNetwork
 				}
 
 				//回傳資訊
-				byte[] data = Encoding.ASCII.GetBytes(responce);
+				byte[] data = Encoding.UTF8.GetBytes(responce);
 				mySocket.BeginSend(data, 0, data
 					.Length, SocketFlags.None, new AsyncCallback(SendCallback), mySocket);
 
