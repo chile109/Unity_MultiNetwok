@@ -10,8 +10,8 @@ namespace TcpClient
     class Program
     {
         private static Socket _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-        static void Main(string[] args)
+		static IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse("10.211.55.3"), 100);
+		static void Main(string[] args)
         {
             Console.Title = "TCP client";
             LoopConnect();
@@ -46,7 +46,7 @@ namespace TcpClient
                 try
                 {
                     attempts++;
-                    _clientSocket.Connect(IPAddress.Loopback, 100);
+                    _clientSocket.Connect(remoteEP);
                 }
                 catch(SocketException)
                 {
