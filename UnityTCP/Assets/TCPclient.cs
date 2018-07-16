@@ -33,12 +33,9 @@ public class ClientTCP
 
 	private void ConnectCallBack(IAsyncResult result)
 	{
-		Debug.Log("callback");
 		try
 		{
-			Debug.Log("callback1");
 			client.EndConnect(result);
-			Debug.Log("callback2");
 			if (client.Connected == false) { return; }
 			else
 			{
