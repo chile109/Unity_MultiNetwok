@@ -60,6 +60,7 @@ class ClientThread
 	{
 		if (threadReceive != null && threadReceive.IsAlive == true)
 			return;
+		
 		threadReceive = new Thread(ReceiveMessage);
 		threadReceive.IsBackground = true;
 		threadReceive.Start();
@@ -74,12 +75,13 @@ class ClientThread
 			try
 			{
 				attempts++;
-			clientSocket.Connect(IPAddress.Parse(internet.ip), internet.port);
+				clientSocket.Connect(IPAddress.Parse(internet.ip), internet.port);
 			}
 			catch (SocketException)
 			{
 				Debug.Log("Connection attemps: " + attempts.ToString());
 			}
+
 
 		Debug.Log("connected");
 	}
@@ -109,6 +111,15 @@ class ClientThread
 			byte[] data = new byte[rec];
 			Array.Copy(receivedBuf, data, rec);     //裁減responce
 			Debug.Log("Received: " + Encoding.UTF8.GetString(data));
+
+			if (Encoding.UTF8.GetString(data) == "disconnected")
+				Exit();
 		}
+	}
+
+	private void Exit()
+	{
+		clientSocket.Shutdown(SocketShutdown.Both);
+		clientSocket.Close();
 	}
 }
