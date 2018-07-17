@@ -8,7 +8,7 @@ namespace TcpClient
 	class Program
 	{
 		private static Socket _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-		static IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 100);
+		static IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse("10.211.55.3"), 100);
 		static void Main(string[] args)
 		{
 			Console.Title = "TCP client";
