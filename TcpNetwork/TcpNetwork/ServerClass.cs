@@ -15,6 +15,8 @@ namespace TcpNetwork
 		private static Socket _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
 		static NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
+
+		//取代不夠明確的IPAddress.Any位址
 		static IPAddress GetIPV4()
 		{
 			foreach (IPAddressInformation ipInfo in nics[0].GetIPProperties().UnicastAddresses)
@@ -34,27 +36,27 @@ namespace TcpNetwork
 			_serverSocket.BeginAccept(new AsyncCallback(AccepCallBack), null);
 		}
 
+		private static void Broadcast(string msg)
+		{
+			byte[] data = Encoding.UTF8.GetBytes(msg);
+			for (int i = 0; i < _Clients.Count; i++)
+			{
+				_Clients[i].Send(data);
+			}
+		}
 		//開放連線委派
 		private static void AccepCallBack(IAsyncResult result)
 		{
 			Socket mySocket = _serverSocket.EndAccept(result);
 			_Clients.Add(mySocket);
 
-			Console.WriteLine("Client Connected");
+			string msg = "Connection received from " + mySocket.RemoteEndPoint;
+			Console.WriteLine(msg);
+			Broadcast(msg);
 
 			mySocket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), mySocket);
 
 			_serverSocket.BeginAccept(new AsyncCallback(AccepCallBack), null);
-
-			//找到空的array位置Assign連接的client
-			/*for (int i = 0; i < _Clients.Count; i++)
-			{
-				if (_Clients[i] != null)
-				{
-					Console.WriteLine("Connection received from " + );
-					return; //中斷迴圈以免所有空array都被Assign
-				}
-			}*/
 		}
 
 		//訊息接收委派
