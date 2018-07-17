@@ -8,6 +8,7 @@ using System.Net.Sockets;
 
 public class NetworkManager : MonoBehaviour
 {
+	public string Name = "Kevin";
 	public InputField Keyin;
 	public Button s_btn;
 	private static Socket _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -18,7 +19,7 @@ public class NetworkManager : MonoBehaviour
 
 	private void Start()
 	{
-		ct = new ClientThread(_clientSocket , remoteEP);
+		ct = new ClientThread(_clientSocket, Name, remoteEP);
 		ct.StartConnect();
 	}
 

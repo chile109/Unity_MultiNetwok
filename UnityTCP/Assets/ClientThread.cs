@@ -9,6 +9,7 @@ class ClientThread
 {
 	public struct Struct_Internet
 	{
+		public string name;
 		public string ip;
 		public int port;
 	}
@@ -21,9 +22,10 @@ class ClientThread
 	private Thread threadReceive;
 	private Thread threadConnect;
 
-	public ClientThread(Socket _socket, IPEndPoint EP)
+	public ClientThread(Socket _socket, string _name, IPEndPoint EP)
 	{
 		clientSocket = _socket;
+		internet.name = _name;
 		internet.ip = EP.Address.ToString();
 		internet.port = EP.Port;
 		receiveMessage = null;
@@ -112,6 +114,8 @@ class ClientThread
 			Array.Copy(receivedBuf, data, rec);     //裁減responce
 			Debug.Log("Received: " + Encoding.UTF8.GetString(data));
 
+			if (Encoding.UTF8.GetString(data) == "%NAME")
+				Send("%NAME|" + internet.name);
 			if (Encoding.UTF8.GetString(data) == "disconnected")
 				Exit();
 		}

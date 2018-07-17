@@ -4,18 +4,17 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace TcpNetwork
 {
 	class ServerClass
 	{
 		private static byte[] _buffer = new byte[2048];     //緩存
-		private static List<Socket> _Clients = new List<Socket>();  //client列表
+		private static List<ClientClass> _Clients = new List<ClientClass>();  //client列表
 		private static Socket _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
 		static NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
-
+		static ClientClass _tempClient = new ClientClass();
 		//取代不夠明確的IPAddress.Any位址
 		static IPAddress GetIPV4()
 		{
@@ -36,44 +35,46 @@ namespace TcpNetwork
 			_serverSocket.BeginAccept(new AsyncCallback(AccepCallBack), null);
 		}
 
-		private static void Broadcast(string msg)
+		private static void Broadcast(string msg, List<ClientClass> _clients)
 		{
 			byte[] data = Encoding.UTF8.GetBytes(msg);
-			for (int i = 0; i < _Clients.Count; i++)
+			foreach (var c in _clients)
 			{
-				_Clients[i].Send(data);
+				c.socket.Send(data);
 			}
 		}
 		//開放連線委派
 		private static void AccepCallBack(IAsyncResult result)
 		{
-			Socket mySocket = _serverSocket.EndAccept(result);
-			_Clients.Add(mySocket);
+			_tempClient.socket = _serverSocket.EndAccept(result);
+			_tempClient.ip = _tempClient.socket.RemoteEndPoint.ToString();
 
-			string msg = "Connection received from " + mySocket.RemoteEndPoint;
+			_Clients.Add(_tempClient);
+
+			string msg = _tempClient.ip + " Connected";
+			Broadcast("%NAME", new List<ClientClass>() { _Clients[_Clients.Count - 1] });
 			Console.WriteLine(msg);
-			Broadcast(msg);
 
-			mySocket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), mySocket);
-
+			_tempClient.socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), _tempClient.socket);
 			_serverSocket.BeginAccept(new AsyncCallback(AccepCallBack), null);
 		}
 
 		//訊息接收委派
 		private static void ReceiveCallback(IAsyncResult result)
 		{
-			Socket CurrentSocket = (Socket)result.AsyncState;
+			_tempClient.socket = (Socket)result.AsyncState;
+
 			int Received;
 			try
 			{
-				Received = CurrentSocket.EndReceive(result);
+				Received = _tempClient.socket.EndReceive(result);
 			}
 			catch (SocketException)
 			{
 				Console.WriteLine("Client forcefully disconnected");
 				// Don't shutdown because the socket may be disposed and its disconnected anyway.
-				CurrentSocket.Close();
-				_Clients.Remove(CurrentSocket);
+				_tempClient.socket.Close();
+				_Clients.Remove(_tempClient);
 				return;
 			}
 
@@ -81,7 +82,6 @@ namespace TcpNetwork
 			Array.Copy(_buffer, _dataBuf, Received);    //ReSize Buffer
 
 			string text = Encoding.UTF8.GetString(_dataBuf);
-			Console.WriteLine("Received: " + text);
 			string responce = string.Empty;
 			byte[] data;
 
@@ -91,31 +91,39 @@ namespace TcpNetwork
 				case "get time":    //取得系統時間
 					responce = DateTime.Now.ToLongTimeString();
 					data = Encoding.UTF8.GetBytes(responce);
-					CurrentSocket.Send(data);
+					_tempClient.socket.Send(data);
 					break;
 
 				case "exit":        // Client離線
 					responce = "disconnected";
 					data = Encoding.UTF8.GetBytes(responce);
-					CurrentSocket.Send(data);
-					//CurrentSocket.BeginSend(data, 0, data.Length, SocketFlags.None,SendCallback, CurrentSocket);	//非同步方式發送
+					_tempClient.socket.Send(data);
+					//_tempClient.socket.BeginSend(data, 0, data.Length, SocketFlags.None,SendCallback, _tempClient.socket);	//非同步方式發送
 
 					// Always Shutdown before closing
-					CurrentSocket.Shutdown(SocketShutdown.Both);
-					CurrentSocket.Close();
-					_Clients.Remove(CurrentSocket);
+					_tempClient.socket.Shutdown(SocketShutdown.Both);
+					_tempClient.socket.Close();
+					_Clients.Remove(_tempClient);
 					Console.WriteLine("Client disconnected");
 					return;
 
 				default:            //不合法請求
-					responce = "Invalid Request";
-					data = Encoding.UTF8.GetBytes(responce);
-					CurrentSocket.Send(data);
+					if (text.Contains("%NAME"))
+					{
+						_tempClient.client_ID = text.Split('|')[1];
+					}
+					else
+					{
+						responce = "Invalid Request";
+						data = Encoding.UTF8.GetBytes(responce);
+						_tempClient.socket.Send(data);
+					}
 					break;
 
 			}
+			Console.WriteLine(_tempClient.client_ID + ": " + text);
 
-			CurrentSocket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), CurrentSocket);
+			_tempClient.socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), _tempClient.socket);
 		}
 	}
 }
