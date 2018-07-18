@@ -9,12 +9,12 @@ namespace TcpNetwork
 {
 	class ServerClass
 	{
-		private static byte[] _buffer = new byte[2048];     //緩存
-		private static List<ClientClass> _Clients = new List<ClientClass>();  //client列表
+		public static List<ClientClass> _Clients = new List<ClientClass>();  //client列表
 		private static TcpListener _serverSocket;
 
 		static NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
 		static ClientClass _tempClient = new ClientClass();
+
 		//取代不夠明確的IPAddress.Any位址
 		static IPAddress GetIPV4()
 		{
@@ -29,101 +29,31 @@ namespace TcpNetwork
 		//啟動 server
 		public void SetServer()
 		{
-			Console.WriteLine("setting server");
 			_serverSocket = new TcpListener(GetIPV4(), 100);
 			_serverSocket.Start();
-			_serverSocket.BeginAcceptSocket(new AsyncCallback(AccepCallBack), null);
+			_serverSocket.BeginAcceptTcpClient(AccepCallBack, null);
+			Console.WriteLine("Server Start");
 		}
 
-		private static void Broadcast(string msg, List<ClientClass> _clients)
+		public static void Broadcast(string msg)
 		{
-			byte[] data = Encoding.UTF8.GetBytes(msg);
-			foreach (var c in _clients)
+			foreach (var c in _Clients)
 			{
-				c.socket.Send(data);
+				c.Send(msg);
 			}
 		}
 		//開放連線委派
 		private static void AccepCallBack(IAsyncResult result)
 		{
-			_tempClient.socket = _serverSocket.EndAcceptSocket(result);
-			_tempClient.ip = _tempClient.socket.RemoteEndPoint.ToString();
+			ClientClass tempclient = new ClientClass();
+			TcpClient TempSocket = _serverSocket.EndAcceptTcpClient(result);
+			_serverSocket.BeginAcceptTcpClient(AccepCallBack, null);
 
-			_Clients.Add(_tempClient);
-
-			string msg = _tempClient.ip + " Connected";
-			Broadcast("%NAME", new List<ClientClass>() { _Clients[_Clients.Count - 1] });
-			Console.WriteLine(msg);
-
-			_tempClient.socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), _tempClient.socket);
-			_serverSocket.BeginAcceptSocket(new AsyncCallback(AccepCallBack), null);
-		}
-
-		//訊息接收委派
-		private static void ReceiveCallback(IAsyncResult result)
-		{
-			_tempClient.socket = (Socket)result.AsyncState;
-
-			int Received;
-			try
-			{
-				Received = _tempClient.socket.EndReceive(result);
-			}
-			catch (SocketException)
-			{
-				Console.WriteLine("Client forcefully disconnected");
-				// Don't shutdown because the socket may be disposed and its disconnected anyway.
-				_tempClient.socket.Close();
-				_Clients.Remove(_tempClient);
-				return;
-			}
-
-			byte[] _dataBuf = new byte[Received];
-			Array.Copy(_buffer, _dataBuf, Received);    //ReSize Buffer
-
-			string text = Encoding.UTF8.GetString(_dataBuf);
-			string responce = string.Empty;
-			byte[] data;
-
-			//Api在此實作
-			switch (text.ToLower())
-			{
-				case "get time":    //取得系統時間
-					responce = DateTime.Now.ToLongTimeString();
-					data = Encoding.UTF8.GetBytes(responce);
-					_tempClient.socket.Send(data);
-					break;
-
-				case "exit":        // Client離線
-					responce = "disconnected";
-					data = Encoding.UTF8.GetBytes(responce);
-					_tempClient.socket.Send(data);
-					//_tempClient.socket.BeginSend(data, 0, data.Length, SocketFlags.None,SendCallback, _tempClient.socket);	//非同步方式發送
-
-					// Always Shutdown before closing
-					_tempClient.socket.Shutdown(SocketShutdown.Both);
-					_tempClient.socket.Close();
-					_Clients.Remove(_tempClient);
-					Console.WriteLine("Client disconnected");
-					return;
-
-				default:            //不合法請求
-					if (text.Contains("%NAME"))
-					{
-						_tempClient.client_ID = text.Split('|')[1];
-					}
-					else
-					{
-						responce = "Invalid Request";
-						data = Encoding.UTF8.GetBytes(responce);
-						_tempClient.socket.Send(data);
-					}
-					break;
-
-			}
-			Console.WriteLine(_tempClient.client_ID + ": " + text);
-
-			_tempClient.socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), _tempClient.socket);
+			tempclient.mySocket = TempSocket;
+			tempclient.ip = TempSocket.Client.RemoteEndPoint.ToString();
+			tempclient.Start();
+			_Clients.Add(tempclient);
+			Console.WriteLine("Connection received from " + _Clients[0].ip);
 		}
 	}
 }
