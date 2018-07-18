@@ -59,13 +59,7 @@ namespace TcpNetwork
 			myStream.Write(data, 0, data.Length);
 		}
 
-		private void KillSocket()
-		{
-			Send("disconnected");
-			mySocket.Close();
-			ServerClass._Clients.Remove(this);
-			Console.WriteLine("Client disconnected");
-		}
+		
 		//收到data呼叫的委派
 		private void ApiResponce(string text)
 		{
@@ -73,8 +67,8 @@ namespace TcpNetwork
 			switch (text.ToLower())
 			{
 				case "get time":    //取得系統時間
-					responce = DateTime.Now.ToLongTimeString();
-					break;
+					RebackTime();
+					return;
 
 				case "exit":        // Client離線
 					KillSocket();
@@ -88,15 +82,28 @@ namespace TcpNetwork
 					}
 					else
 					{
-						responce = text;
+						responce = client_ID + ": " + text;
 					}
 					break;
 
 			}
 			myStream.BeginRead(_buffer, 0, mySocket.ReceiveBufferSize, ReceiveDataCallBack, null);   //重新接收資料
-			Send(responce);
+			ServerClass.Broadcast(responce);
 			Console.WriteLine(client_ID + ": " + text);
 		}
 
+		private void RebackTime()
+		{
+			Send(DateTime.Now.ToLongTimeString());
+			myStream.BeginRead(_buffer, 0, mySocket.ReceiveBufferSize, ReceiveDataCallBack, null); 
+		}
+
+		private void KillSocket()
+		{
+			Send("disconnected");
+			mySocket.Close();
+			ServerClass._Clients.Remove(this);
+			Console.WriteLine("Client disconnected");
+		}
 	}
 }

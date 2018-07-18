@@ -7,7 +7,7 @@ using System.Text;
 
 namespace TcpNetwork
 {
-	class ServerClass
+	public class ServerClass
 	{
 		public static List<ClientClass> _Clients = new List<ClientClass>();  //client列表
 		private static TcpListener _serverSocket;
