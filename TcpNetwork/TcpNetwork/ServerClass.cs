@@ -11,7 +11,7 @@ namespace TcpNetwork
 	{
 		private static byte[] _buffer = new byte[2048];     //緩存
 		private static List<ClientClass> _Clients = new List<ClientClass>();  //client列表
-		private static Socket _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+		private static TcpListener _serverSocket;
 
 		static NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
 		static ClientClass _tempClient = new ClientClass();
@@ -30,9 +30,9 @@ namespace TcpNetwork
 		public void SetServer()
 		{
 			Console.WriteLine("setting server");
-			_serverSocket.Bind(new IPEndPoint(GetIPV4(), 100)); //sochet綁定IP & Port
-			_serverSocket.Listen(10);    //允許連線的client佇列數量
-			_serverSocket.BeginAccept(new AsyncCallback(AccepCallBack), null);
+			_serverSocket = new TcpListener(GetIPV4(), 100);
+			_serverSocket.Start();
+			_serverSocket.BeginAcceptSocket(new AsyncCallback(AccepCallBack), null);
 		}
 
 		private static void Broadcast(string msg, List<ClientClass> _clients)
@@ -46,7 +46,7 @@ namespace TcpNetwork
 		//開放連線委派
 		private static void AccepCallBack(IAsyncResult result)
 		{
-			_tempClient.socket = _serverSocket.EndAccept(result);
+			_tempClient.socket = _serverSocket.EndAcceptSocket(result);
 			_tempClient.ip = _tempClient.socket.RemoteEndPoint.ToString();
 
 			_Clients.Add(_tempClient);
@@ -56,7 +56,7 @@ namespace TcpNetwork
 			Console.WriteLine(msg);
 
 			_tempClient.socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), _tempClient.socket);
-			_serverSocket.BeginAccept(new AsyncCallback(AccepCallBack), null);
+			_serverSocket.BeginAcceptSocket(new AsyncCallback(AccepCallBack), null);
 		}
 
 		//訊息接收委派
