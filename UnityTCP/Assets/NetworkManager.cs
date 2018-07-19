@@ -9,6 +9,8 @@ using System.Net.Sockets;
 public class NetworkManager : MonoBehaviour
 {
 	public string Name = "Kevin";
+	public string chatmsg;
+	public Text Chatbox;
 	public InputField Keyin;
 	public Button s_btn;
 	private static Socket _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -28,6 +30,8 @@ public class NetworkManager : MonoBehaviour
 		if (ct.receiveMessage != null)
 		{
 			Debug.Log("Server:" + ct.receiveMessage);
+			chatmsg += ct.receiveMessage + Environment.NewLine;
+			Chatbox.text = chatmsg;
 			ct.receiveMessage = null;
 		}
 
@@ -41,7 +45,7 @@ public class NetworkManager : MonoBehaviour
 
 	private void OnApplicationQuit()
 	{
-		ct.StopConnect();
+		ct.Send("exit");
 	}
 
 
