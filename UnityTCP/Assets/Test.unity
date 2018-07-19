@@ -141,7 +141,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: kae
+  chatmsg: 
+  Chatbox: {fileID: 1075330131}
   Keyin: {fileID: 1815941665}
+  c_btn: {fileID: 231125707}
   s_btn: {fileID: 593079801}
 --- !u!4 &48577660
 Transform:
@@ -316,7 +319,7 @@ GameObject:
   - component: {fileID: 231125708}
   - component: {fileID: 231125707}
   m_Layer: 5
-  m_Name: Button (1)
+  m_Name: Btn_connect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -379,18 +382,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 231125708}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 48577659}
-        m_MethodName: SendInput
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &231125708
@@ -628,7 +620,7 @@ GameObject:
   - component: {fileID: 593079802}
   - component: {fileID: 593079801}
   m_Layer: 5
-  m_Name: Button
+  m_Name: Btn_send
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

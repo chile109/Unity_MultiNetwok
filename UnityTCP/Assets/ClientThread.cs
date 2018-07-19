@@ -14,7 +14,7 @@ class ClientThread
 		public int port;
 	}
 
-	private Socket clientSocket;//連線使用的Socket
+	public Socket clientSocket;//連線使用的Socket
 	private Struct_Internet internet;
 	public string receiveMessage;
 	private string sendMessage;
@@ -83,9 +83,6 @@ class ClientThread
 			{
 				Debug.Log("Connection attemps: " + attempts.ToString());
 			}
-
-
-		Debug.Log("connected");
 	}
 
 	private void SendMessage()
