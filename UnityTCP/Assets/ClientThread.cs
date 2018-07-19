@@ -103,7 +103,7 @@ class ClientThread
 		}
 	}
 
-	private void ReceiveMessage()
+	public void ReceiveMessage()
 	{
 		if (clientSocket.Connected == true)
 		{
@@ -112,18 +112,13 @@ class ClientThread
 
 			byte[] data = new byte[rec];
 			Array.Copy(receivedBuf, data, rec);     //裁減responce
-			Debug.Log("Received: " + Encoding.UTF8.GetString(data));
+			receiveMessage = Encoding.UTF8.GetString(data);
 
 			if (Encoding.UTF8.GetString(data) == "%NAME")
 				Send("%NAME|" + internet.name);
 			if (Encoding.UTF8.GetString(data) == "disconnected")
-				Exit();
+				StopConnect();
 		}
 	}
 
-	private void Exit()
-	{
-		clientSocket.Shutdown(SocketShutdown.Both);
-		clientSocket.Close();
-	}
 }
