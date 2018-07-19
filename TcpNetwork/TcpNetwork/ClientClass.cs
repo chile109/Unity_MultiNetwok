@@ -53,10 +53,17 @@ namespace TcpNetwork
 
 
 		}
-		internal void Send(string msg)
+		public void Send(string msg)
 		{
-			byte[] data = Encoding.UTF8.GetBytes(msg);
-			myStream.Write(data, 0, data.Length);
+			try
+			{
+				byte[] data = Encoding.UTF8.GetBytes(msg);
+				myStream.Write(data, 0, data.Length);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.ToString());
+			}
 		}
 
 		
