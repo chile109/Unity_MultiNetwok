@@ -26,12 +26,13 @@ public class NetworkManager : MonoBehaviour
 	private void Start()
 	{
 		KeyHost.text = "10.211.55.3:100";
-		c_btn.onClick.AddListener(delegate {
+		c_btn.onClick.AddListener(delegate
+		{
 			SetHost();
 			_clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			ct = new ClientThread(_clientSocket, Name, remoteEP);
 			ct.StartConnect();
-		}); 
+		});
 	}
 
 	private void Update()
@@ -66,7 +67,8 @@ public class NetworkManager : MonoBehaviour
 
 	private void OnApplicationQuit()
 	{
-		ct.Send("exit");
+		if (ct != null)
+			ct.Send("exit");
 
 	}
 

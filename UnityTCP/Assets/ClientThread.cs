@@ -62,7 +62,7 @@ class ClientThread
 	{
 		if (threadReceive != null && threadReceive.IsAlive == true)
 			return;
-		
+
 		threadReceive = new Thread(ReceiveMessage);
 		threadReceive.IsBackground = true;
 		threadReceive.Start();
@@ -81,6 +81,8 @@ class ClientThread
 			}
 			catch (SocketException)
 			{
+				if (attempts > 5)
+					return;
 				Debug.Log("Connection attemps: " + attempts.ToString());
 			}
 	}
