@@ -22,6 +22,9 @@ class ClientThread
 	private Thread threadReceive;
 	private Thread threadConnect;
 
+	public delegate void DisplayString(string param);
+	public DisplayString handlerString;
+
 	public ClientThread(Socket _socket, string _name, IPEndPoint EP)
 	{
 		clientSocket = _socket;
@@ -81,8 +84,14 @@ class ClientThread
 			}
 			catch (SocketException)
 			{
-				if (attempts > 5)
+				if (attempts >= 100)
+				{
+					NetworkManager.Singleton.AddTask(delegate
+					{
+						handlerString("Fail Connect!" + Environment.NewLine);
+					});
 					return;
+				}
 				Debug.Log("Connection attemps: " + attempts.ToString());
 			}
 	}

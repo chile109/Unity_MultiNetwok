@@ -21,7 +21,16 @@ public class NetworkManager : MonoBehaviour
 	static IPEndPoint remoteEP;
 
 	private ClientThread ct;
-	private bool isReceive;
+
+	public static NetworkManager Singleton { get; set; }
+	Queue<Action> mThreadTaskOnMain = new Queue<Action>();
+
+	void Awake()
+	{
+		// 確保不死
+		DontDestroyOnLoad(this);
+		Singleton = this;
+	}
 
 	private void Start()
 	{
@@ -32,7 +41,10 @@ public class NetworkManager : MonoBehaviour
 			_clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			ct = new ClientThread(_clientSocket, Name, remoteEP);
 			ct.StartConnect();
+			ct.handlerString += ConnectFailed;
 		});
+
+
 	}
 
 	private void Update()
@@ -51,6 +63,16 @@ public class NetworkManager : MonoBehaviour
 
 			ct.Receive();
 		}
+
+		lock (mThreadTaskOnMain)
+		{
+			if (mThreadTaskOnMain.Count < 1)
+				return;
+			// 取出
+			var task = mThreadTaskOnMain.Dequeue();
+			// 執行
+			task();
+		}
 	}
 
 	void SetHost()
@@ -60,6 +82,20 @@ public class NetworkManager : MonoBehaviour
 		info[1] = KeyHost.text.Split(':')[1];
 		remoteEP = new IPEndPoint(IPAddress.Parse(info[0]), int.Parse(info[1]));
 	}
+
+	public void ConnectFailed(string msg)
+	{
+		Chatbox.text = msg;
+	}
+
+	public void AddTask(Action task)
+	{
+		lock (mThreadTaskOnMain)
+		{
+			mThreadTaskOnMain.Enqueue(task);
+		}
+	}
+
 	public void SendInput()
 	{
 		ct.Send(Keyin.text);
