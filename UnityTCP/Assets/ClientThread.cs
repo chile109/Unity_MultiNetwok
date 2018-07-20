@@ -122,10 +122,15 @@ class ClientThread
 
 			byte[] data = new byte[rec];
 			Array.Copy(receivedBuf, data, rec);     //裁減responce
-			receiveMessage = Encoding.UTF8.GetString(data);
 
 			if (Encoding.UTF8.GetString(data) == "%NAME")
+			{
 				Send("%NAME|" + internet.name);
+				return;
+			}
+
+			receiveMessage = Encoding.UTF8.GetString(data);
+
 			if (Encoding.UTF8.GetString(data) == "disconnected")
 				StopConnect();
 		}

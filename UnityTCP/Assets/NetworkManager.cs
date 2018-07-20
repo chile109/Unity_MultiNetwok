@@ -8,12 +8,12 @@ using System.Net.Sockets;
 
 public class NetworkManager : MonoBehaviour
 {
-	public string Name = "Kevin";
 	public string chatmsg;
 
 	public Text Chatbox;
 	public InputField Keyin;
 	public InputField KeyHost;
+	public InputField KeyName;
 	public Button c_btn;
 	public Button s_btn;
 
@@ -34,12 +34,13 @@ public class NetworkManager : MonoBehaviour
 
 	private void Start()
 	{
+		KeyName.text = "kevin";
 		KeyHost.text = "10.211.55.3:100";
 		c_btn.onClick.AddListener(delegate
 		{
 			SetHost();
 			_clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-			ct = new ClientThread(_clientSocket, Name, remoteEP);
+			ct = new ClientThread(_clientSocket, KeyName.text, remoteEP);
 			ct.StartConnect();
 			ct.handlerString += ConnectFailed;
 		});
