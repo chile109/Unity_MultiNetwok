@@ -45,6 +45,7 @@ class ClientThread
 		try
 		{
 			clientSocket.Close();
+			KillThread();
 		}
 		catch (Exception e)
 		{
@@ -86,6 +87,7 @@ class ClientThread
 			{
 				if (attempts >= 100)
 				{
+					StopConnect();
 					NetworkManager.Singleton.AddTask(delegate
 					{
 						handlerString("Fail Connect!" + Environment.NewLine);
@@ -129,4 +131,9 @@ class ClientThread
 		}
 	}
 
+	public void KillThread()
+	{
+		threadReceive.Abort();
+		threadReceive.Abort();
+	}
 }

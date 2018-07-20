@@ -104,8 +104,9 @@ public class NetworkManager : MonoBehaviour
 	private void OnApplicationQuit()
 	{
 		if (ct != null)
+		{
 			ct.Send("exit");
-
+		}
 	}
 
 
